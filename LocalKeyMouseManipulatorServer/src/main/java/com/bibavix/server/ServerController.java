@@ -13,52 +13,81 @@ public class ServerController {
     ServerSocket serverSocket;
     Socket clientSocket;
 
-    public ServerController(){
+    boolean serverStatus;
+
+    public ServerController() {
         serverSocket = null;
         clientSocket = null;
+        serverStatus = false;
     }
 
-    public boolean startServer(){
+    public boolean startServer() {
         try {
             serverSocket = new ServerSocket(this.port);
-            System.out.println("Server started on port" + port);
-            clientSocket = serverSocket.accept();
-            System.out.println("Client connected: " + clientSocket.getInetAddress());
-            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 
-            String message = in.readLine();
-            System.out.println("Received from client: " + message);
-
-            // Process the received message
-            String response = "Hello, Client!";
-
-            // Send the response back to the client
-            out.println(response);
-            System.out.println("Sent to client: " + response);
             return Boolean.TRUE;
-            // Close the socket
 
         } catch (IOException e) {
-                return Boolean.FALSE;
+            e.printStackTrace();
+            return Boolean.FALSE;
         }
     }
 
-    public Boolean stopServer(){
+    public Boolean stopServer() {
         try {
             Boolean statusServer = Boolean.FALSE;
-            if (clientSocket != null){
+            if (clientSocket != null) {
                 clientSocket.close();
                 statusServer = Boolean.TRUE;
             }
-            if (serverSocket != null){
+            if (serverSocket != null) {
                 serverSocket.close();
                 statusServer = Boolean.TRUE;
             }
             return statusServer;
-        }catch (IOException e){
+        } catch (IOException e) {
             return Boolean.FALSE;
         }
+    }
+
+    public void acceptConnections(){
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        clientSocket = serverSocket.accept();
+                        System.out.println("Client connected");
+                        System.out.println("Client connected: " + clientSocket.getInetAddress());
+                        BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                        PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+
+                        String message = in.readLine();
+                        System.out.println("Received from client: " + message);
+
+                        // Process the received message
+                        String response = "Hello, Client!";
+
+                        // Send the response back to the client
+                        out.println(response);
+                        System.out.println("Sent to client: " + response);
+
+                    } catch (IOException e) {
+
+                    }
+                }
+            }
+        });
+
+        thread.start();
+    }
+
+    public boolean getServerStatus() {
+        return this.serverStatus;
+    }
+
+    public void setServerStatus(boolean serverStatus) {
+        this.serverStatus = serverStatus;
     }
 
 }
