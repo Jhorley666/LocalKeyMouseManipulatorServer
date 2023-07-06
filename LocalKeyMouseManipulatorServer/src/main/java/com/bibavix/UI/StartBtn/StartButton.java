@@ -21,11 +21,9 @@ public class StartButton extends JToggleButton implements ItemListener {
     public void itemStateChanged(ItemEvent e) {
 
         if (isSelected()){
-            System.out.println("Selected");
             serverController.setServerStatus(Boolean.TRUE);
             serverController.startServer();
         } else {
-            System.out.println("Not Selected");
             serverController.setServerStatus(Boolean.FALSE);
             serverController.stopServer();
         }

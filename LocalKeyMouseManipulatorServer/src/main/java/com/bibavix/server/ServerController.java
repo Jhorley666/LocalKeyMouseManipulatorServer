@@ -51,33 +51,27 @@ public class ServerController {
     }
 
     public void acceptConnections(){
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        clientSocket = serverSocket.accept();
-                        System.out.println("Client connected");
-                        System.out.println("Client connected: " + clientSocket.getInetAddress());
-                        BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                        PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+        Runnable runnable = () -> {
 
+                try {
+                    clientSocket = serverSocket.accept();
+                    BufferedReader in = null;
+                    if (clientSocket.isConnected()){
+                        System.out.println("Client connected: " + clientSocket.getInetAddress());
+                        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                    }
+                    while (true && clientSocket.isConnected()) {
                         String message = in.readLine();
                         System.out.println("Received from client: " + message);
 
-                        // Process the received message
-                        String response = "Hello, Client!";
-
-                        // Send the response back to the client
-                        out.println(response);
-                        System.out.println("Sent to client: " + response);
-
-                    } catch (IOException e) {
-
+                        if  (!serverStatus) break;
                     }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            }
-        });
+        };
+        Thread thread = new Thread(runnable);
 
         thread.start();
     }
